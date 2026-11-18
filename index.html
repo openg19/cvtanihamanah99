@@ -120,10 +120,10 @@
           <span id="labelKpiBaseline" class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Modal Awal Periode</span>
           <span id="activePeriodBadge" class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">Bulan 2</span>
         </div>
-        <div id="kpiMonth1NetWorth" class="text-xl sm:text-2xl font-black text-slate-900 mt-1.5">Rp 184.000.000</div>
+        <div id="kpiMonth1NetWorth" class="text-xl sm:text-2xl font-black text-slate-900 mt-1.5">Rp 0</div>
         <div class="mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
-          <span>Awal: <strong id="kpiInitialCapText">136 Jt</strong></span>
-          <span class="text-emerald-700 font-semibold">+Laba Lalu: <strong id="kpiMonth1ProfitText">48 Jt</strong></span>
+          <span>Awal: <strong id="kpiInitialCapText">0 Jt</strong></span>
+          <span class="text-emerald-700 font-semibold">+Laba Lalu: <strong id="kpiMonth1ProfitText">0 Jt</strong></span>
         </div>
       </div>
 
@@ -134,9 +134,15 @@
           <span class="w-2 h-2 rounded-full bg-blue-600"></span>
         </div>
         <div id="kpiCurrentCash" class="text-xl sm:text-2xl font-black text-blue-700 mt-1.5">Rp 0</div>
-        <div class="mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
-          <span>Nilai Stok:</span>
-          <strong id="kpiCurrentStock" class="text-slate-800">Rp 0</strong>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-0.5">
+          <div class="flex justify-between">
+            <span>Total Stok:</span>
+            <strong id="kpiCurrentStock" class="text-slate-800">Rp 0</strong>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400">
+            <span>Bahan: <strong id="kpiRawStockText" class="text-amber-700">Rp 0</strong></span>
+            <span>Jadi: <strong id="kpiFinishedStockText" class="text-emerald-700">Rp 0</strong></span>
+          </div>
         </div>
       </div>
 
@@ -246,8 +252,28 @@
                 <input id="txDate" type="date" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs sm:text-sm" />
               </div>
               <div>
-                <label for="txAmount" class="block text-xs font-bold text-slate-700 mb-1">Nominal (Rp)</label>
+                <label id="labelTxAmount" for="txAmount" class="block text-xs font-bold text-slate-700 mb-1">Total Nilai Nota (Rp)</label>
                 <input id="txAmount" type="number" min="1000" step="500" placeholder="2500000" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold text-slate-900" />
+              </div>
+            </div>
+
+            <!-- DP / Uang Muka Input Box (Visible for SALE_CREDIT & EXPENSE_CREDIT) -->
+            <div id="dpInputContainer" class="hidden rounded-xl bg-amber-50/80 border border-amber-300 p-3 space-y-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                <div>
+                  <label for="txDpAmount" class="block text-xs font-extrabold text-amber-950 mb-1">💵 DP / Uang Muka Tunai (Rp)</label>
+                  <input id="txDpAmount" type="number" min="0" step="500" value="0" placeholder="Isi 0 jika tanpa DP" class="w-full rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-xs sm:text-sm font-bold text-slate-900" />
+                </div>
+                <div class="text-[11px] bg-white/90 rounded-lg p-2 border border-amber-200 space-y-0.5">
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Masuk/Keluar Kas (DP):</span>
+                    <strong id="dpCashPreview" class="text-blue-700">Rp 0</strong>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Sisa Masuk Buku Tempo:</span>
+                    <strong id="dpRemainingPreview" class="text-amber-900">Rp 0</strong>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -280,15 +306,38 @@
             </button>
           </form>
 
-          <!-- Nilai Stok Akhir Bulan -->
-          <div class="pt-3 border-t border-slate-200 space-y-2">
-            <label for="inputEndingStock" class="block text-xs font-bold text-slate-700">📦 Nilai Sisa Stok Bahan & Barang Jadi Akhir Bulan (Rp)</label>
-            <div class="flex gap-2">
-              <input id="inputEndingStock" type="number" min="0" step="50000" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold text-slate-900" />
-              <button id="btnUpdateStock" type="button" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition">
-                Perbarui Stok
-              </button>
+          <!-- Saldo Kas & Rincian Stok Akhir Bulan (Bisa Diisi Manual untuk Bulan Oktober / Tutup Buku) -->
+          <div class="pt-3 border-t border-slate-200 space-y-2.5">
+            <div class="rounded-lg bg-blue-50/70 border border-blue-200 p-2.5 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="inputDirectCash" class="text-[11px] font-extrabold text-blue-900">💰 Set Saldo Kas & Rekening Saat Ini (Rp)</label>
+                <span class="text-[10px] text-blue-700 font-semibold">Opsional / Langsung</span>
+              </div>
+              <div class="flex gap-2">
+                <input id="inputDirectCash" type="number" step="50000" placeholder="Isi saldo kas riil saat ini" class="flex-1 rounded-lg border border-blue-300 bg-white px-2.5 py-1.5 text-xs font-bold text-blue-950" />
+                <button id="btnSetDirectCash" type="button" class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">
+                  Set Kas
+                </button>
+              </div>
             </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-slate-800">📦 Rincian Sisa Stok Akhir Bulan</span>
+              <span class="text-[11px] font-bold text-slate-500">Total: <strong id="totalEndingStockLabel" class="text-slate-900">Rp 0</strong></span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label for="inputEndingRawStock" class="block text-[11px] font-bold text-amber-800 mb-1">1. Nilai Stok Bahan Baku (Rp)</label>
+                <input id="inputEndingRawStock" type="number" min="0" step="50000" value="0" placeholder="Bawang mentah, minyak, kemasan" class="w-full rounded-lg border border-amber-300 bg-amber-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-900" />
+              </div>
+              <div>
+                <label for="inputEndingFinishedStock" class="block text-[11px] font-bold text-emerald-800 mb-1">2. Nilai Stok Barang Jadi (Rp)</label>
+                <input id="inputEndingFinishedStock" type="number" min="0" step="50000" value="0" placeholder="Bawang goreng siap jual" class="w-full rounded-lg border border-emerald-300 bg-emerald-50/40 px-2.5 py-1.5 text-xs sm:text-sm font-bold text-slate-900" />
+              </div>
+            </div>
+            <input id="inputEndingStock" type="hidden" value="0" />
+            <button id="btnUpdateStock" type="button" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition">
+              Perbarui Stok
+            </button>
           </div>
         </div>
 
@@ -347,7 +396,15 @@
                     <strong id="m2CashNow" class="text-blue-700">Rp 0</strong>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-slate-600">Nilai Stok Saat Ini:</span>
+                    <span class="text-slate-600">Nilai Stok Bahan Baku:</span>
+                    <strong id="m2RawStockNow" class="text-amber-800">Rp 0</strong>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-600">Nilai Stok Barang Jadi:</span>
+                    <strong id="m2FinishedStockNow" class="text-emerald-700">Rp 0</strong>
+                  </div>
+                  <div class="flex justify-between text-[11px] text-slate-500">
+                    <span>Total Nilai Stok (Bahan + Jadi):</span>
                     <strong id="m2StockNow" class="text-slate-900">Rp 0</strong>
                   </div>
                   <div class="flex justify-between">
@@ -364,7 +421,7 @@
                   </div>
                   <div class="flex justify-between">
                     <span class="text-slate-600">Modal Patokan Awal:</span>
-                    <strong id="m2BaselineAdjusted" class="text-slate-700">Rp 184.000.000</strong>
+                    <strong id="m2BaselineAdjusted" class="text-slate-700">Rp 0</strong>
                   </div>
                   <div class="flex justify-between border-t-2 border-slate-300 pt-2 text-sm font-black text-emerald-700">
                     <span>LABA BERSIH:</span>
@@ -448,6 +505,33 @@
               <strong id="bookTotalRec" class="text-base font-black text-teal-700">Rp 0</strong>
             </div>
           </div>
+          <!-- Form Tambah Langsung Sisa Piutang / Nota Piutang -->
+          <form id="formQuickAddRec" class="rounded-xl bg-teal-50/70 border border-teal-200 p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-teal-900">➕ Tambah Data / Sisa Piutang Pelanggan</span>
+              <span class="text-[10px] font-bold bg-white text-teal-800 px-2 py-0.5 rounded border border-teal-200">Otomatis Masuk Periode Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input id="qaRecParty" type="text" placeholder="Nama Pelanggan / Agen" required class="rounded-lg border border-teal-300 bg-white px-2.5 py-1.5 text-xs font-semibold" />
+              <input id="qaRecDesc" type="text" placeholder="Keterangan Nota / Barang" required class="rounded-lg border border-teal-300 bg-white px-2.5 py-1.5 text-xs" />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label for="qaRecTotal" class="block text-[10px] font-bold text-teal-900 mb-0.5">Total Nilai Nota (Rp)</label>
+                <input id="qaRecTotal" type="number" min="1000" step="500" placeholder="Contoh: 10000000" required class="w-full rounded-lg border border-teal-300 bg-white px-2.5 py-1.5 text-xs font-bold" />
+              </div>
+              <div>
+                <label for="qaRecDp" class="block text-[10px] font-bold text-teal-900 mb-0.5">DP / Sudah Dibayar (Rp)</label>
+                <input id="qaRecDp" type="number" min="0" step="500" value="0" placeholder="0 jika belum ada DP" class="w-full rounded-lg border border-teal-300 bg-white px-2.5 py-1.5 text-xs font-bold" />
+              </div>
+              <div class="flex flex-col justify-end">
+                <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold py-1.5 px-3 rounded-lg shadow-sm transition">
+                  + Simpan Piutang
+                </button>
+              </div>
+            </div>
+          </form>
+
           <div id="receivablesList" class="space-y-2.5"></div>
         </div>
 
@@ -463,6 +547,33 @@
               <strong id="bookTotalPay" class="text-base font-black text-rose-600">Rp 0</strong>
             </div>
           </div>
+          <!-- Form Tambah Langsung Sisa Bon Hutang Supplier -->
+          <form id="formQuickAddPay" class="rounded-xl bg-rose-50/70 border border-rose-200 p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-rose-900">➕ Tambah Data / Sisa Bon Hutang Supplier</span>
+              <span class="text-[10px] font-bold bg-white text-rose-800 px-2 py-0.5 rounded border border-rose-200">Otomatis Masuk Periode Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input id="qaPayParty" type="text" placeholder="Nama Supplier / Petani" required class="rounded-lg border border-rose-300 bg-white px-2.5 py-1.5 text-xs font-semibold" />
+              <input id="qaPayDesc" type="text" placeholder="Keterangan Bon (Bawang/Minyak/Kemasan)" required class="rounded-lg border border-rose-300 bg-white px-2.5 py-1.5 text-xs" />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label for="qaPayTotal" class="block text-[10px] font-bold text-rose-900 mb-0.5">Total Nilai Bon (Rp)</label>
+                <input id="qaPayTotal" type="number" min="1000" step="500" placeholder="Contoh: 15000000" required class="w-full rounded-lg border border-rose-300 bg-white px-2.5 py-1.5 text-xs font-bold" />
+              </div>
+              <div>
+                <label for="qaPayDp" class="block text-[10px] font-bold text-rose-900 mb-0.5">DP / Sudah Dibayar (Rp)</label>
+                <input id="qaPayDp" type="number" min="0" step="500" value="0" placeholder="0 jika belum ada DP" class="w-full rounded-lg border border-rose-300 bg-white px-2.5 py-1.5 text-xs font-bold" />
+              </div>
+              <div class="flex flex-col justify-end">
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold py-1.5 px-3 rounded-lg shadow-sm transition">
+                  + Simpan Bon Hutang
+                </button>
+              </div>
+            </div>
+          </form>
+
           <div id="payablesList" class="space-y-2.5"></div>
         </div>
       </div>
@@ -485,32 +596,41 @@
           <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div class="sm:col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
               <label for="qcPrevNetWorth" class="block text-xs font-bold text-slate-700 mb-1">1. Kekayaan Bersih Akhir Bulan Sebelumnya (Modal Patokan Awal)</label>
-              <input id="qcPrevNetWorth" type="number" value="184000000" step="100000" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-extrabold text-slate-900" />
+              <input id="qcPrevNetWorth" type="number" value="0" step="100000" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-extrabold text-slate-900" />
             </div>
 
             <div class="bg-blue-50/50 p-3.5 rounded-xl border border-blue-200">
               <label for="qcCashNow" class="block text-xs font-bold text-blue-900 mb-1">2. Total Kas & Rekening Saat Ini</label>
-              <input id="qcCashNow" type="number" value="145000000" step="100000" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-bold text-blue-900" />
+              <input id="qcCashNow" type="number" value="0" step="100000" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm font-bold text-blue-900" />
             </div>
 
-            <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200">
-              <label for="qcStockNow" class="block text-xs font-bold text-amber-900 mb-1">3. Nilai Sisa Stok Bahan & Barang</label>
-              <input id="qcStockNow" type="number" value="38000000" step="100000" class="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-bold text-amber-900" />
+            <div class="bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 space-y-2">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label for="qcRawStockNow" class="block text-[11px] font-bold text-amber-900 mb-1">3A. Stok Bahan Baku</label>
+                  <input id="qcRawStockNow" type="number" value="0" step="50000" class="w-full rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-xs font-bold text-amber-900" />
+                </div>
+                <div>
+                  <label for="qcFinishedStockNow" class="block text-[11px] font-bold text-emerald-900 mb-1">3B. Stok Barang Jadi</label>
+                  <input id="qcFinishedStockNow" type="number" value="0" step="50000" class="w-full rounded-lg border border-emerald-300 bg-white px-2.5 py-1.5 text-xs font-bold text-emerald-900" />
+                </div>
+              </div>
+              <input id="qcStockNow" type="hidden" value="0" />
             </div>
 
             <div class="bg-teal-50/50 p-3.5 rounded-xl border border-teal-200">
               <label for="qcRecNow" class="block text-xs font-bold text-teal-900 mb-1">4. Total Sisa Piutang Belum Cair</label>
-              <input id="qcRecNow" type="number" value="62000000" step="100000" class="w-full rounded-lg border border-teal-300 bg-white px-3 py-2 text-sm font-bold text-teal-900" />
+              <input id="qcRecNow" type="number" value="0" step="100000" class="w-full rounded-lg border border-teal-300 bg-white px-3 py-2 text-sm font-bold text-teal-900" />
             </div>
 
             <div class="bg-rose-50/50 p-3.5 rounded-xl border border-rose-200">
               <label for="qcPayNow" class="block text-xs font-bold text-rose-900 mb-1">5. Total Sisa Bon Hutang Aktif</label>
-              <input id="qcPayNow" type="number" value="19000000" step="100000" class="w-full rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-bold text-rose-900" />
+              <input id="qcPayNow" type="number" value="0" step="100000" class="w-full rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-bold text-rose-900" />
             </div>
 
             <div class="sm:col-span-2 bg-purple-50/50 p-3.5 rounded-xl border border-purple-200">
               <label for="qcOwnerDraw" class="block text-xs font-bold text-purple-900 mb-1">6. Pengambilan Pribadi / Prive Bulan Ini</label>
-              <input id="qcOwnerDraw" type="number" value="10000000" step="100000" class="w-full rounded-lg border border-purple-300 bg-white px-3 py-2 text-sm font-bold text-purple-900" />
+              <input id="qcOwnerDraw" type="number" value="0" step="100000" class="w-full rounded-lg border border-purple-300 bg-white px-3 py-2 text-sm font-bold text-purple-900" />
             </div>
           </div>
 
@@ -519,28 +639,28 @@
             <div class="space-y-2 text-xs">
               <div class="flex justify-between">
                 <span class="text-slate-400">Total Harta (Kas + Stok + Piutang):</span>
-                <strong id="qcTotalAssets">Rp 245.000.000</strong>
+                <strong id="qcTotalAssets">Rp 0</strong>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400">Dikurangi Sisa Bon Hutang:</span>
-                <strong id="qcTotalDebt" class="text-rose-400">− Rp 19.000.000</strong>
+                <strong id="qcTotalDebt" class="text-rose-400">− Rp 0</strong>
               </div>
               <div class="flex justify-between border-t border-slate-800 pt-2 font-bold">
                 <span class="text-amber-300">Kekayaan Bersih Akhir Bulan Ini:</span>
-                <span id="qcEndingNetWorth" class="text-amber-300 text-sm">Rp 226.000.000</span>
+                <span id="qcEndingNetWorth" class="text-amber-300 text-sm">Rp 0</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400">Modal Patokan Bulan Lalu:</span>
-                <strong id="qcPrevWorthDisplay">− Rp 184.000.000</strong>
+                <strong id="qcPrevWorthDisplay">− Rp 0</strong>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400">Ditambah Prive Pemilik:</span>
-                <strong id="qcDrawDisplay" class="text-purple-300">+ Rp 10.000.000</strong>
+                <strong id="qcDrawDisplay" class="text-purple-300">+ Rp 0</strong>
               </div>
             </div>
             <div class="bg-emerald-500/15 border border-emerald-400/30 rounded-xl p-4 text-center">
               <span class="text-[11px] uppercase font-bold tracking-wider text-emerald-300">Laba Bersih Bulan Ini</span>
-              <div id="qcFinalProfit" class="text-2xl font-black text-emerald-400 mt-0.5">Rp 52.000.000</div>
+              <div id="qcFinalProfit" class="text-2xl font-black text-emerald-400 mt-0.5">Rp 0</div>
               <p id="qcProfitNote" class="text-[11px] text-slate-400 mt-1">Kekayaan Akhir bulan ini otomatis menjadi Modal Patokan bulan berikutnya.</p>
             </div>
           </div>
@@ -632,16 +752,38 @@
         </div>
 
         <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
-          Total Kekayaan Patokan Awal Periode = <strong id="baseCalculatedWorth">Rp 184.000.000</strong>
+          Total Kekayaan Patokan Awal Periode = <strong id="baseCalculatedWorth">Rp 0</strong>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="baseStockB1" class="block font-semibold text-slate-700 mb-1">Nilai Stok Awal Periode</label>
-            <input id="baseStockB1" type="number" step="100000" required class="w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold" />
+            <label for="baseRecB1" class="block font-semibold text-teal-800 mb-1">Sisa Piutang Bulan Lalu (Rp)</label>
+            <input id="baseRecB1" type="number" min="0" step="50000" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-teal-700" />
           </div>
           <div>
-            <label for="baseCashB1" class="block font-semibold text-slate-700 mb-1">Saldo Kas Awal Periode</label>
+            <label for="basePayB1" class="block font-semibold text-rose-800 mb-1">Sisa Bon Hutang Bulan Lalu (Rp)</label>
+            <input id="basePayB1" type="number" min="0" step="50000" value="0" class="w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-rose-600" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="baseRawStockB1" class="block font-semibold text-amber-800 mb-1">Stok Bahan Baku Awal (Rp)</label>
+            <input id="baseRawStockB1" type="number" min="0" step="50000" value="0" required class="w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold" />
+          </div>
+          <div>
+            <label for="baseFinishedStockB1" class="block font-semibold text-emerald-800 mb-1">Stok Barang Jadi Awal (Rp)</label>
+            <input id="baseFinishedStockB1" type="number" min="0" step="50000" value="0" required class="w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="baseStockB1" class="block font-semibold text-slate-700 mb-1">Total Stok Awal (Otomatis)</label>
+            <input id="baseStockB1" type="number" readonly class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 font-semibold" />
+          </div>
+          <div>
+            <label for="baseCashB1" class="block font-semibold text-slate-700 mb-1">Saldo Kas Awal (Otomatis)</label>
             <input id="baseCashB1" type="number" readonly class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 font-bold text-blue-700" />
           </div>
         </div>
@@ -718,14 +860,56 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'cv_tanih_amanah99_erp_v2';
+    const STORAGE_KEY = 'cv_tanih_amanah99_erp_v4_oktober_unlocked';
 
     const MONTH_NAMES = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
-    function createInitialPeriodMonth2() {
+    function createEmptyPeriodMonth1() {
+      return {
+        id: 'period-1',
+        number: 1,
+        label: 'Bulan 1 (Okt 2026)',
+        baseline: {
+          initialCapital: 0,
+          month1Profit: 0,
+          month1EndingRawStock: 0,
+          month1EndingFinishedStock: 0,
+          month1EndingStock: 0
+        },
+        month2EndingRawStock: 0,
+        month2EndingFinishedStock: 0,
+        month2EndingStock: 0,
+        receivables: [],
+        payables: [],
+        transactions: []
+      };
+    }
+
+    function createEmptyPeriodMonth2() {
+      return {
+        id: 'period-2',
+        number: 2,
+        label: 'Bulan 2 (Nov 2026)',
+        baseline: {
+          initialCapital: 0,
+          month1Profit: 0,
+          month1EndingRawStock: 0,
+          month1EndingFinishedStock: 0,
+          month1EndingStock: 0
+        },
+        month2EndingRawStock: 0,
+        month2EndingFinishedStock: 0,
+        month2EndingStock: 0,
+        receivables: [],
+        payables: [],
+        transactions: []
+      };
+    }
+
+    function createDemoPeriodMonth2() {
       return {
         id: 'period-2',
         number: 2,
@@ -733,8 +917,12 @@
         baseline: {
           initialCapital: 136000000,
           month1Profit: 48000000,
+          month1EndingRawStock: 18000000,
+          month1EndingFinishedStock: 14000000,
           month1EndingStock: 32000000
         },
+        month2EndingRawStock: 22000000,
+        month2EndingFinishedStock: 16000000,
         month2EndingStock: 38000000,
         receivables: [
           {
@@ -948,10 +1136,11 @@
     }
 
     function getDefaultStore() {
-      const p2 = createInitialPeriodMonth2();
+      const p1 = createEmptyPeriodMonth1();
+      const p2 = createEmptyPeriodMonth2();
       return {
-        activePeriodId: 'period-2',
-        periods: [p2]
+        activePeriodId: 'period-1',
+        periods: [p1, p2]
       };
     }
 
@@ -1005,7 +1194,9 @@
     function computeMetricsForPeriod(appState) {
       const b = appState.baseline;
       const month1NetWorth = (Number(b.initialCapital) || 0) + (Number(b.month1Profit) || 0);
-      const month1Stock = Number(b.month1EndingStock) || 0;
+      const month1RawStock = Number(b.month1EndingRawStock) || 0;
+      const month1FinishedStock = Number(b.month1EndingFinishedStock) || 0;
+      const month1Stock = (month1RawStock + month1FinishedStock) || Number(b.month1EndingStock) || 0;
 
       let month1InitialRec = 0;
       let month1RemainingRec = 0;
@@ -1050,13 +1241,23 @@
       let ownerDraw = 0;
       let capitalIn = 0;
 
+      let dpInFromCreditSales = 0;
+      let dpOutFromCreditPurchases = 0;
+
       appState.transactions.forEach(tx => {
         const amt = Number(tx.amount) || 0;
+        const dp = Number(tx.dpAmount) || 0;
         switch (tx.type) {
           case 'SALE_CASH': saleCash += amt; break;
-          case 'SALE_CREDIT': saleCredit += amt; break;
+          case 'SALE_CREDIT':
+            saleCredit += amt;
+            dpInFromCreditSales += dp;
+            break;
           case 'EXPENSE_CASH': expenseCash += amt; break;
-          case 'EXPENSE_CREDIT': expenseCredit += amt; break;
+          case 'EXPENSE_CREDIT':
+            expenseCredit += amt;
+            dpOutFromCreditPurchases += dp;
+            break;
           case 'COLLECT_RECEIVABLE': collectedRec += amt; break;
           case 'PAY_PAYABLE': paidPay += amt; break;
           case 'OWNER_DRAW': ownerDraw += amt; break;
@@ -1064,8 +1265,10 @@
         }
       });
 
-      const currentCash = month1EndingCash + saleCash + collectedRec + capitalIn - expenseCash - paidPay - ownerDraw;
-      const currentStock = Number(appState.month2EndingStock) || 0;
+      const currentCash = month1EndingCash + saleCash + dpInFromCreditSales + collectedRec + capitalIn - expenseCash - dpOutFromCreditPurchases - paidPay - ownerDraw;
+      const currentRawStock = Number(appState.month2EndingRawStock) || 0;
+      const currentFinishedStock = Number(appState.month2EndingFinishedStock) || 0;
+      const currentStock = (currentRawStock + currentFinishedStock) || Number(appState.month2EndingStock) || 0;
       const totalRemainingRec = month1RemainingRec + month2RemainingRec;
       const totalRemainingPay = month1RemainingPay + month2RemainingPay;
 
@@ -1098,7 +1301,13 @@
         paidPay,
         ownerDraw,
         capitalIn,
+        month1RawStock,
+        month1FinishedStock,
+        dpInFromCreditSales,
+        dpOutFromCreditPurchases,
         currentCash,
+        currentRawStock,
+        currentFinishedStock,
         currentStock,
         stockDiff,
         profitMethod1,
@@ -1108,23 +1317,89 @@
       };
     }
 
+    function syncCascadePeriods() {
+      // Automatically cascade ending net worth, stock, and unpaid receivables/payables from period i to period i+1
+      for (let i = 0; i < store.periods.length - 1; i++) {
+        const prevP = store.periods[i];
+        const nextP = store.periods[i + 1];
+        const pm = computeMetricsForPeriod(prevP);
+
+        nextP.baseline.initialCapital = pm.adjustedBaseline;
+        nextP.baseline.month1Profit = pm.profitMethod1;
+        nextP.baseline.month1EndingRawStock = pm.currentRawStock;
+        nextP.baseline.month1EndingFinishedStock = pm.currentFinishedStock;
+        nextP.baseline.month1EndingStock = pm.currentStock;
+
+        if (nextP.transactions.length === 0 && nextP.month2EndingRawStock === 0 && nextP.month2EndingFinishedStock === 0) {
+          nextP.month2EndingRawStock = pm.currentRawStock;
+          nextP.month2EndingFinishedStock = pm.currentFinishedStock;
+          nextP.month2EndingStock = pm.currentStock;
+        }
+
+        // Preserve any payments already recorded in nextP against carried items by ID
+        const existingCarriedRecPaid = {};
+        nextP.receivables.filter(r => r.origin === 'MONTH_1').forEach(r => {
+          existingCarriedRecPaid[r.sourceId || r.id] = r.paidInMonth2 || 0;
+        });
+        const carriedRecs = prevP.receivables
+          .filter(r => (r.initialAmount - r.paidInMonth2) > 0)
+          .map(r => {
+            const srcId = r.sourceId || r.id;
+            const rem = r.initialAmount - r.paidInMonth2;
+            return {
+              id: 'carry-' + srcId,
+              sourceId: srcId,
+              origin: 'MONTH_1',
+              party: r.party,
+              description: r.description.includes('(Sisa') ? r.description : `${r.description} (Sisa ${prevP.label})`,
+              totalInvoiceAmount: r.totalInvoiceAmount || r.initialAmount,
+              dpAmount: r.dpAmount || 0,
+              initialAmount: rem,
+              paidInMonth2: Math.min(rem, existingCarriedRecPaid[srcId] || 0),
+              date: r.date
+            };
+          });
+        const nextNewRecs = nextP.receivables.filter(r => r.origin !== 'MONTH_1');
+        nextP.receivables = [...carriedRecs, ...nextNewRecs];
+
+        const existingCarriedPayPaid = {};
+        nextP.payables.filter(p => p.origin === 'MONTH_1').forEach(p => {
+          existingCarriedPayPaid[p.sourceId || p.id] = p.paidInMonth2 || 0;
+        });
+        const carriedPays = prevP.payables
+          .filter(p => (p.initialAmount - p.paidInMonth2) > 0)
+          .map(p => {
+            const srcId = p.sourceId || p.id;
+            const rem = p.initialAmount - p.paidInMonth2;
+            return {
+              id: 'carry-' + srcId,
+              sourceId: srcId,
+              origin: 'MONTH_1',
+              party: p.party,
+              description: p.description.includes('(Sisa') ? p.description : `${p.description} (Sisa ${prevP.label})`,
+              totalInvoiceAmount: p.totalInvoiceAmount || p.initialAmount,
+              dpAmount: p.dpAmount || 0,
+              initialAmount: rem,
+              paidInMonth2: Math.min(rem, existingCarriedPayPaid[srcId] || 0),
+              date: p.date
+            };
+          });
+        const nextNewPays = nextP.payables.filter(p => p.origin !== 'MONTH_1');
+        nextP.payables = [...carriedPays, ...nextNewPays];
+      }
+    }
+
     function renderPeriodTabs() {
       const container = document.getElementById('periodTabsContainer');
       container.innerHTML = '';
-
-      // Always show Bulan 1 summary badge (completed baseline)
-      const b1Tag = document.createElement('span');
-      b1Tag.className = 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700';
-      b1Tag.textContent = '✓ Bulan 1 (136 Jt → 184 Jt)';
-      container.appendChild(b1Tag);
 
       store.periods.forEach(p => {
         const isAct = p.id === store.activePeriodId;
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('data-switch-period', p.id);
-        btn.className = `px-3 py-1 rounded-lg text-xs font-bold transition ${isAct ? 'period-pill-active' : 'period-pill-inactive'}`;
-        btn.textContent = p.label;
+        btn.className = `px-3 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 ${isAct ? 'period-pill-active' : 'period-pill-inactive'}`;
+        btn.innerHTML = `<span>${p.number === 1 ? '🟠' : '📅'}</span><span>${p.label}</span>`;
         container.appendChild(btn);
       });
     }
@@ -1134,20 +1409,7 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
-      // Row 1: Bulan 1 Baseline
-      const tr1 = document.createElement('tr');
-      tr1.className = 'bg-slate-50/70';
-      tr1.innerHTML = `
-        <td class="py-2.5 px-3 font-bold text-slate-700">Bulan 1 (Okt 2026) — Selesai</td>
-        <td class="py-2.5 px-3 text-right font-semibold">Rp 136.000.000</td>
-        <td class="py-2.5 px-3 text-right">Rp 134.000.000</td>
-        <td class="py-2.5 px-3 text-right">Rp 32.000.000</td>
-        <td class="py-2.5 px-3 text-right text-teal-700">Rp 42.000.000</td>
-        <td class="py-2.5 px-3 text-right text-rose-600">Rp 24.000.000</td>
-        <td class="py-2.5 px-3 text-right font-extrabold text-slate-900">Rp 184.000.000</td>
-        <td class="py-2.5 px-3 text-right font-extrabold text-emerald-700">+ Rp 48.000.000</td>
-      `;
-      tbody.appendChild(tr1);
+      // All periods (Bulan 1 Oktober, Bulan 2 November, Bulan 3 Desember, dst.) are rendered directly from store.periods
 
       store.periods.forEach(p => {
         const pm = computeMetricsForPeriod(p);
@@ -1169,8 +1431,11 @@
     }
 
     function renderAll() {
+      syncCascadePeriods();
       const appState = getActivePeriod();
       const m = computeMetricsForPeriod(appState);
+      const directCashEl = document.getElementById('inputDirectCash');
+      if (directCashEl) directCashEl.value = m.currentCash;
 
       renderPeriodTabs();
       document.getElementById('activePeriodBadge').textContent = appState.label;
@@ -1182,6 +1447,8 @@
 
       document.getElementById('kpiCurrentCash').textContent = formatRp(m.currentCash);
       document.getElementById('kpiCurrentStock').textContent = formatRp(m.currentStock);
+      document.getElementById('kpiRawStockText').textContent = formatRp(m.currentRawStock);
+      document.getElementById('kpiFinishedStockText').textContent = formatRp(m.currentFinishedStock);
 
       document.getElementById('kpiTotalReceivables').textContent = formatRp(m.totalRemainingRec);
       document.getElementById('kpiRecOldText').textContent = 'Lalu: ' + formatRp(m.month1RemainingRec);
@@ -1194,7 +1461,10 @@
       document.getElementById('kpiMonth2Profit').textContent = formatRp(m.profitMethod1);
       document.getElementById('kpiMonth2NetWorth').textContent = formatRp(m.month2NetWorth);
 
+      document.getElementById('inputEndingRawStock').value = m.currentRawStock;
+      document.getElementById('inputEndingFinishedStock').value = m.currentFinishedStock;
       document.getElementById('inputEndingStock').value = m.currentStock;
+      document.getElementById('totalEndingStockLabel').textContent = formatRp(m.currentStock);
 
       document.getElementById('m1SaleCash').textContent = formatRp(m.saleCash);
       document.getElementById('m1SaleCredit').textContent = formatRp(m.saleCredit);
@@ -1205,6 +1475,8 @@
       document.getElementById('m1FinalProfit').textContent = formatRp(m.profitMethod1);
 
       document.getElementById('m2CashNow').textContent = formatRp(m.currentCash);
+      document.getElementById('m2RawStockNow').textContent = formatRp(m.currentRawStock);
+      document.getElementById('m2FinishedStockNow').textContent = formatRp(m.currentFinishedStock);
       document.getElementById('m2StockNow').textContent = formatRp(m.currentStock);
       document.getElementById('m2RecNow').textContent = formatRp(m.totalRemainingRec);
       document.getElementById('m2PayNow').textContent = formatRp(m.totalRemainingPay);
@@ -1289,6 +1561,23 @@
         container.classList.add('hidden');
         selectEl.innerHTML = '';
       }
+
+      const dpBox = document.getElementById('dpInputContainer');
+      if (txType === 'SALE_CREDIT' || txType === 'EXPENSE_CREDIT') {
+        dpBox.classList.remove('hidden');
+        updateDpPreview();
+      } else {
+        dpBox.classList.add('hidden');
+        document.getElementById('txDpAmount').value = 0;
+      }
+    }
+
+    function updateDpPreview() {
+      const total = Math.max(0, Number(document.getElementById('txAmount').value) || 0);
+      const dp = Math.min(total, Math.max(0, Number(document.getElementById('txDpAmount').value) || 0));
+      const rem = Math.max(0, total - dp);
+      document.getElementById('dpCashPreview').textContent = formatRp(dp);
+      document.getElementById('dpRemainingPreview').textContent = formatRp(rem);
     }
 
     function renderTransactionTable(appState) {
@@ -1324,7 +1613,7 @@
           <td class="py-2.5 px-3 font-medium text-slate-600 whitespace-nowrap">${tx.date}</td>
           <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${meta.badge}">${meta.label}</span></td>
           <td class="py-2.5 px-3 font-semibold text-slate-800">${tx.party || '-'}</td>
-          <td class="py-2.5 px-3 text-slate-600">${tx.note}</td>
+          <td class="py-2.5 px-3 text-slate-600">${tx.note}${tx.dpAmount > 0 ? ` <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded ml-1">DP: ${formatRp(tx.dpAmount)}</span>` : ''}</td>
           <td class="py-2.5 px-3 text-right font-bold text-slate-900 whitespace-nowrap">${formatRp(tx.amount)}</td>
           <td class="py-2.5 px-3 text-[11px] font-semibold text-slate-600">${meta.cashEffect}</td>
           <td class="py-2.5 px-3 text-[11px] font-semibold text-slate-700">${meta.profitEffect}</td>
@@ -1362,7 +1651,7 @@
             <div class="text-sm font-bold text-slate-900">${r.party}</div>
             <div class="text-xs text-slate-500">${r.description}</div>
             <div class="text-xs text-slate-600">
-              Nota: <strong>${formatRp(r.initialAmount)}</strong> • Cair Bulan Ini: <strong class="text-emerald-700">${formatRp(r.paidInMonth2)}</strong>
+              Total Nota: <strong>${formatRp(r.totalInvoiceAmount || r.initialAmount)}</strong>${r.dpAmount > 0 ? ` • DP Awal: <strong class="text-blue-700">${formatRp(r.dpAmount)}</strong>` : ''} • Cicilan/Pelunasan: <strong class="text-emerald-700">${formatRp(r.paidInMonth2)}</strong>
             </div>
           </div>
           <div class="flex sm:flex-col items-end justify-between gap-2 shrink-0">
@@ -1370,7 +1659,10 @@
               <span class="text-[10px] uppercase text-slate-400 block">Sisa Piutang</span>
               <strong class="text-sm font-black ${isLunas ? 'text-slate-400' : 'text-teal-700'}">${formatRp(rem)}</strong>
             </div>
-            ${!isLunas ? `<button type="button" data-settle-rec="${r.id}" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🤝 Terima Bayaran</button>` : ''}
+            <div class="flex items-center gap-1.5">
+              ${!isLunas ? `<button type="button" data-settle-rec="${r.id}" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">🤝 Terima Bayaran</button>` : ''}
+              <button type="button" data-delete-rec="${r.id}" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 transition" title="Hapus Nota">✕</button>
+            </div>
           </div>
         `;
         recContainer.appendChild(card);
@@ -1398,7 +1690,7 @@
             <div class="text-sm font-bold text-slate-900">${p.party}</div>
             <div class="text-xs text-slate-500">${p.description}</div>
             <div class="text-xs text-slate-600">
-              Bon: <strong>${formatRp(p.initialAmount)}</strong> • Dibayar Bulan Ini: <strong class="text-emerald-700">${formatRp(p.paidInMonth2)}</strong>
+              Total Bon: <strong>${formatRp(p.totalInvoiceAmount || p.initialAmount)}</strong>${p.dpAmount > 0 ? ` • DP Awal: <strong class="text-blue-700">${formatRp(p.dpAmount)}</strong>` : ''} • Cicilan/Pelunasan: <strong class="text-emerald-700">${formatRp(p.paidInMonth2)}</strong>
             </div>
           </div>
           <div class="flex sm:flex-col items-end justify-between gap-2 shrink-0">
@@ -1406,7 +1698,10 @@
               <span class="text-[10px] uppercase text-slate-400 block">Sisa Bon</span>
               <strong class="text-sm font-black ${isLunas ? 'text-slate-400' : 'text-rose-600'}">${formatRp(rem)}</strong>
             </div>
-            ${!isLunas ? `<button type="button" data-settle-pay="${p.id}" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">💳 Bayar Bon</button>` : ''}
+            <div class="flex items-center gap-1.5">
+              ${!isLunas ? `<button type="button" data-settle-pay="${p.id}" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">💳 Bayar Bon</button>` : ''}
+              <button type="button" data-delete-pay="${p.id}" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1.5 rounded-lg border border-rose-200 hover:bg-rose-50 transition" title="Hapus Bon">✕</button>
+            </div>
           </div>
         `;
         payContainer.appendChild(card);
@@ -1417,17 +1712,19 @@
       const ctx = document.getElementById('financeChart');
       if (!ctx || typeof Chart === 'undefined') return;
 
-      const labels = ['Kas & Bank', 'Stok Barang', 'Sisa Piutang', 'Sisa Hutang', 'Kekayaan Bersih'];
+      const labels = ['Kas & Bank', 'Stok Bahan', 'Stok Barang Jadi', 'Sisa Piutang', 'Sisa Hutang', 'Kekayaan Bersih'];
       const dataB1 = [
         +(m.month1EndingCash / 1e6).toFixed(2),
-        +(m.month1Stock / 1e6).toFixed(2),
+        +(m.month1RawStock / 1e6).toFixed(2),
+        +(m.month1FinishedStock / 1e6).toFixed(2),
         +(m.month1InitialRec / 1e6).toFixed(2),
         +(m.month1InitialPay / 1e6).toFixed(2),
         +(m.month1NetWorth / 1e6).toFixed(2)
       ];
       const dataB2 = [
         +(m.currentCash / 1e6).toFixed(2),
-        +(m.currentStock / 1e6).toFixed(2),
+        +(m.currentRawStock / 1e6).toFixed(2),
+        +(m.currentFinishedStock / 1e6).toFixed(2),
         +(m.totalRemainingRec / 1e6).toFixed(2),
         +(m.totalRemainingPay / 1e6).toFixed(2),
         +(m.month2NetWorth / 1e6).toFixed(2)
@@ -1481,7 +1778,10 @@
     function runQuickCalculator() {
       const prevWorth = Number(document.getElementById('qcPrevNetWorth').value) || 0;
       const cashNow = Number(document.getElementById('qcCashNow').value) || 0;
-      const stockNow = Number(document.getElementById('qcStockNow').value) || 0;
+      const rawStockNow = Number(document.getElementById('qcRawStockNow').value) || 0;
+      const finStockNow = Number(document.getElementById('qcFinishedStockNow').value) || 0;
+      const stockNow = rawStockNow + finStockNow;
+      document.getElementById('qcStockNow').value = stockNow;
       const recNow = Number(document.getElementById('qcRecNow').value) || 0;
       const payNow = Number(document.getElementById('qcPayNow').value) || 0;
       const drawNow = Number(document.getElementById('qcOwnerDraw').value) || 0;
@@ -1536,10 +1836,12 @@
       const openRolloverModal = () => {
         const currentPeriod = getActivePeriod();
         const m = computeMetricsForPeriod(currentPeriod);
-        const nextNum = store.periods.length + 2;
+        const currentIdx = store.periods.findIndex(p => p.id === currentPeriod.id);
+        const existingNext = store.periods[currentIdx + 1];
+        const nextNum = existingNext ? existingNext.number : (store.periods[store.periods.length - 1].number + 1);
         const monthIdx = (9 + nextNum - 1) % 12;
         const yearNum = 2026 + Math.floor((9 + nextNum - 1) / 12);
-        const suggestedName = `Bulan ${nextNum} (${MONTH_NAMES[monthIdx].slice(0, 3)} ${yearNum})`;
+        const suggestedName = existingNext ? existingNext.label : `Bulan ${nextNum} (${MONTH_NAMES[monthIdx].slice(0, 3)} ${yearNum})`;
 
         document.getElementById('nextPeriodNameInput').value = suggestedName;
         const unpaidRecCount = currentPeriod.receivables.filter(r => (r.initialAmount - r.paidInMonth2) > 0).length;
@@ -1581,8 +1883,22 @@
 
       document.getElementById('btnConfirmRollover').addEventListener('click', () => {
         const currentPeriod = getActivePeriod();
+        const currentIdx = store.periods.findIndex(p => p.id === currentPeriod.id);
+        if (currentIdx >= 0 && currentIdx < store.periods.length - 1) {
+          // Next period already exists (e.g., moving from Bulan 1 Oktober -> Bulan 2 November)
+          const targetNext = store.periods[currentIdx + 1];
+          const customLabel = document.getElementById('nextPeriodNameInput').value.trim();
+          if (customLabel) targetNext.label = customLabel;
+          syncCascadePeriods();
+          store.activePeriodId = targetNext.id;
+          saveStore();
+          renderAll();
+          closeRolloverModal();
+          showToast(`Tutup buku ${currentPeriod.label} selesai! Sisa piutang, hutang, kas & stok otomatis masuk ke ${targetNext.label}.`, '🚀');
+          return;
+        }
         const m = computeMetricsForPeriod(currentPeriod);
-        const nextNum = store.periods.length + 2;
+        const nextNum = store.periods[store.periods.length - 1].number + 1;
         const label = document.getElementById('nextPeriodNameInput').value.trim() || `Bulan ${nextNum}`;
 
         // Carry over only unpaid receivables and payables into the new month as MONTH_1 (carried over)
@@ -1618,8 +1934,12 @@
           baseline: {
             initialCapital: m.adjustedBaseline,
             month1Profit: m.profitMethod1,
+            month1EndingRawStock: m.currentRawStock,
+            month1EndingFinishedStock: m.currentFinishedStock,
             month1EndingStock: m.currentStock
           },
+          month2EndingRawStock: m.currentRawStock,
+          month2EndingFinishedStock: m.currentFinishedStock,
           month2EndingStock: m.currentStock,
           receivables: carriedReceivables,
           payables: carriedPayables,
@@ -1686,27 +2006,44 @@
           }
           pay.paidInMonth2 += amount;
           party = pay.party;
-        } else if (type === 'SALE_CREDIT') {
+        }
+
+        let dpAmount = 0;
+        if (type === 'SALE_CREDIT' || type === 'EXPENSE_CREDIT') {
+          dpAmount = Math.max(0, Number(document.getElementById('txDpAmount').value) || 0);
+          if (dpAmount >= amount) {
+            showToast('Nominal DP tidak boleh melebihi atau sama dengan Total Nota (gunakan transaksi Tunai jika langsung lunas).', '⚠️');
+            return;
+          }
+        }
+
+        if (type === 'SALE_CREDIT') {
           const newRecId = 'rec-b2-' + Date.now();
           linkedId = newRecId;
+          const remainingCredit = amount - dpAmount;
           appState.receivables.push({
             id: newRecId,
             origin: 'MONTH_2',
             party: partyInput || 'Pelanggan Tempo',
             description: note,
-            initialAmount: amount,
+            totalInvoiceAmount: amount,
+            dpAmount,
+            initialAmount: remainingCredit,
             paidInMonth2: 0,
             date
           });
         } else if (type === 'EXPENSE_CREDIT') {
           const newPayId = 'pay-b2-' + Date.now();
           linkedId = newPayId;
+          const remainingDebt = amount - dpAmount;
           appState.payables.push({
             id: newPayId,
             origin: 'MONTH_2',
             party: partyInput || 'Supplier Bahan',
             description: note,
-            initialAmount: amount,
+            totalInvoiceAmount: amount,
+            dpAmount,
+            initialAmount: remainingDebt,
             paidInMonth2: 0,
             date
           });
@@ -1720,6 +2057,7 @@
           category,
           note,
           amount,
+          dpAmount,
           linkedId
         });
 
@@ -1727,8 +2065,10 @@
         renderAll();
 
         document.getElementById('txAmount').value = '';
+        document.getElementById('txDpAmount').value = 0;
         document.getElementById('txParty').value = '';
         document.getElementById('txNote').value = '';
+        updateDpPreview();
         showToast('Transaksi disimpan & laba otomatis diperbarui!');
       });
 
@@ -1759,16 +2099,184 @@
         showToast('Transaksi dihapus.', '🗑️');
       });
 
+      ['txAmount', 'txDpAmount'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateDpPreview);
+      });
+
+      ['inputEndingRawStock', 'inputEndingFinishedStock'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          const rawVal = Math.max(0, Number(document.getElementById('inputEndingRawStock').value) || 0);
+          const finVal = Math.max(0, Number(document.getElementById('inputEndingFinishedStock').value) || 0);
+          document.getElementById('inputEndingStock').value = rawVal + finVal;
+          document.getElementById('totalEndingStockLabel').textContent = formatRp(rawVal + finVal);
+        });
+      });
+
       document.getElementById('btnUpdateStock').addEventListener('click', () => {
         const appState = getActivePeriod();
-        const val = Number(document.getElementById('inputEndingStock').value) || 0;
-        appState.month2EndingStock = Math.max(0, val);
+        const rawVal = Math.max(0, Number(document.getElementById('inputEndingRawStock').value) || 0);
+        const finVal = Math.max(0, Number(document.getElementById('inputEndingFinishedStock').value) || 0);
+        appState.month2EndingRawStock = rawVal;
+        appState.month2EndingFinishedStock = finVal;
+        appState.month2EndingStock = rawVal + finVal;
         saveStore();
         renderAll();
-        showToast('Nilai stok akhir bulan diperbarui!');
+        showToast('Rincian stok bahan baku & barang jadi berhasil diperbarui!');
+      });
+
+      // Quick Add Receivable in Tab 2
+      document.getElementById('formQuickAddRec').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const appState = getActivePeriod();
+        const party = document.getElementById('qaRecParty').value.trim();
+        const desc = document.getElementById('qaRecDesc').value.trim();
+        const total = Math.max(0, Number(document.getElementById('qaRecTotal').value) || 0);
+        const dp = Math.max(0, Number(document.getElementById('qaRecDp').value) || 0);
+        if (total <= 0 || dp >= total) {
+          showToast('Total nota harus > 0 dan DP harus lebih kecil dari Total Nota.', '⚠️');
+          return;
+        }
+        const rem = total - dp;
+        const newRecId = 'rec-manual-' + Date.now();
+        appState.receivables.push({
+          id: newRecId,
+          origin: 'MONTH_2',
+          party,
+          description: desc,
+          totalInvoiceAmount: total,
+          dpAmount: dp,
+          initialAmount: rem,
+          paidInMonth2: 0,
+          date: todayStr
+        });
+        appState.transactions.push({
+          id: 'tx-' + Date.now(),
+          date: todayStr,
+          type: 'SALE_CREDIT',
+          party,
+          category: 'Penjualan Bawang Goreng',
+          note: desc,
+          amount: total,
+          dpAmount: dp,
+          linkedId: newRecId
+        });
+        document.getElementById('qaRecParty').value = '';
+        document.getElementById('qaRecDesc').value = '';
+        document.getElementById('qaRecTotal').value = '';
+        document.getElementById('qaRecDp').value = 0;
+        saveStore();
+        renderAll();
+        showToast(`Piutang ${party} (Sisa: ${formatRp(rem)}) berhasil ditambahkan ke ${appState.label}!`);
+      });
+
+      // Quick Add Payable in Tab 2
+      document.getElementById('formQuickAddPay').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const appState = getActivePeriod();
+        const party = document.getElementById('qaPayParty').value.trim();
+        const desc = document.getElementById('qaPayDesc').value.trim();
+        const total = Math.max(0, Number(document.getElementById('qaPayTotal').value) || 0);
+        const dp = Math.max(0, Number(document.getElementById('qaPayDp').value) || 0);
+        if (total <= 0 || dp >= total) {
+          showToast('Total bon harus > 0 dan DP harus lebih kecil dari Total Bon.', '⚠️');
+          return;
+        }
+        const rem = total - dp;
+        const newPayId = 'pay-manual-' + Date.now();
+        appState.payables.push({
+          id: newPayId,
+          origin: 'MONTH_2',
+          party,
+          description: desc,
+          totalInvoiceAmount: total,
+          dpAmount: dp,
+          initialAmount: rem,
+          paidInMonth2: 0,
+          date: todayStr
+        });
+        appState.transactions.push({
+          id: 'tx-' + Date.now(),
+          date: todayStr,
+          type: 'EXPENSE_CREDIT',
+          party,
+          category: 'Bahan Baku Bawang Merah',
+          note: desc,
+          amount: total,
+          dpAmount: dp,
+          linkedId: newPayId
+        });
+        document.getElementById('qaPayParty').value = '';
+        document.getElementById('qaPayDesc').value = '';
+        document.getElementById('qaPayTotal').value = '';
+        document.getElementById('qaPayDp').value = 0;
+        saveStore();
+        renderAll();
+        showToast(`Bon hutang ${party} (Sisa: ${formatRp(rem)}) berhasil ditambahkan ke ${appState.label}!`);
+      });
+
+      // Set Direct Cash Button (Adjusts cash balance directly for quick October setup)
+      document.getElementById('btnSetDirectCash').addEventListener('click', () => {
+        const appState = getActivePeriod();
+        const targetCash = Math.max(0, Number(document.getElementById('inputDirectCash').value) || 0);
+        const m = computeMetricsForPeriod(appState);
+        const diff = targetCash - m.currentCash;
+        if (diff === 0) {
+          showToast('Saldo Kas sudah sesuai dengan angka tersebut.');
+          return;
+        }
+        if (diff > 0) {
+          appState.transactions.push({
+            id: 'tx-cash-adj-' + Date.now(),
+            date: todayStr,
+            type: 'SALE_CASH',
+            party: 'Penyesuaian Saldo Kas Riil',
+            category: 'Penjualan Bawang Goreng',
+            note: `Penyesuaian saldo kas aktif (${appState.label})`,
+            amount: diff,
+            dpAmount: 0,
+            linkedId: ''
+          });
+        } else {
+          appState.transactions.push({
+            id: 'tx-cash-adj-' + Date.now(),
+            date: todayStr,
+            type: 'EXPENSE_CASH',
+            party: 'Penyesuaian Saldo Kas Riil',
+            category: 'Lainnya / Operasional',
+            note: `Penyesuaian pengeluaran kas aktif (${appState.label})`,
+            amount: Math.abs(diff),
+            dpAmount: 0,
+            linkedId: ''
+          });
+        }
+        saveStore();
+        renderAll();
+        showToast(`Saldo Kas ${appState.label} berhasil diset ke ${formatRp(targetCash)}!`);
       });
 
       document.getElementById('tab-hutang-piutang').addEventListener('click', (e) => {
+        const delRecBtn = e.target.closest('[data-delete-rec]');
+        if (delRecBtn) {
+          const recId = delRecBtn.getAttribute('data-delete-rec');
+          const appState = getActivePeriod();
+          appState.receivables = appState.receivables.filter(r => r.id !== recId);
+          appState.transactions = appState.transactions.filter(t => t.linkedId !== recId);
+          saveStore();
+          renderAll();
+          showToast('Data piutang dihapus.', '🗑️');
+          return;
+        }
+        const delPayBtn = e.target.closest('[data-delete-pay]');
+        if (delPayBtn) {
+          const payId = delPayBtn.getAttribute('data-delete-pay');
+          const appState = getActivePeriod();
+          appState.payables = appState.payables.filter(p => p.id !== payId);
+          appState.transactions = appState.transactions.filter(t => t.linkedId !== payId);
+          saveStore();
+          renderAll();
+          showToast('Data bon hutang dihapus.', '🗑️');
+          return;
+        }
         const recBtn = e.target.closest('[data-settle-rec]');
         const payBtn = e.target.closest('[data-settle-pay]');
         if (!recBtn && !payBtn) return;
@@ -1884,7 +2392,11 @@
         const m = computeMetricsForPeriod(appState);
         document.getElementById('baseInitialCap').value = appState.baseline.initialCapital;
         document.getElementById('baseMonth1Profit').value = appState.baseline.month1Profit;
-        document.getElementById('baseStockB1').value = appState.baseline.month1EndingStock;
+        document.getElementById('baseRawStockB1').value = m.month1RawStock;
+        document.getElementById('baseFinishedStockB1').value = m.month1FinishedStock;
+        document.getElementById('baseStockB1').value = m.month1Stock;
+        document.getElementById('baseRecB1').value = m.month1InitialRec;
+        document.getElementById('basePayB1').value = m.month1InitialPay;
         document.getElementById('baseCalculatedWorth').textContent = formatRp(m.month1NetWorth);
         document.getElementById('baseCashB1').value = m.month1EndingCash;
         document.getElementById('modalBaseline').classList.remove('hidden');
@@ -1895,15 +2407,18 @@
       document.getElementById('btnCloseBaselineModal').addEventListener('click', closeBaselineModal);
       document.getElementById('btnCancelBaseline').addEventListener('click', closeBaselineModal);
 
-      ['baseInitialCap', 'baseMonth1Profit', 'baseStockB1'].forEach(id => {
+      ['baseInitialCap', 'baseMonth1Profit', 'baseRawStockB1', 'baseFinishedStockB1', 'baseRecB1', 'basePayB1'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => {
-          const appState = getActivePeriod();
           const cap = Number(document.getElementById('baseInitialCap').value) || 0;
           const prof = Number(document.getElementById('baseMonth1Profit').value) || 0;
-          const st = Number(document.getElementById('baseStockB1').value) || 0;
+          const rawSt = Number(document.getElementById('baseRawStockB1').value) || 0;
+          const finSt = Number(document.getElementById('baseFinishedStockB1').value) || 0;
+          const st = rawSt + finSt;
+          document.getElementById('baseStockB1').value = st;
+          const recB1 = Number(document.getElementById('baseRecB1').value) || 0;
+          const payB1 = Number(document.getElementById('basePayB1').value) || 0;
           const worth = cap + prof;
-          const m = computeMetricsForPeriod(appState);
-          const cashB1 = worth - st - m.month1InitialRec + m.month1InitialPay;
+          const cashB1 = worth - st - recB1 + payB1;
           document.getElementById('baseCalculatedWorth').textContent = formatRp(worth);
           document.getElementById('baseCashB1').value = cashB1;
         });
@@ -1912,16 +2427,59 @@
       document.getElementById('formBaseline').addEventListener('submit', (e) => {
         e.preventDefault();
         const appState = getActivePeriod();
-        appState.baseline.initialCapital = Number(document.getElementById('baseInitialCap').value) || 0;
-        appState.baseline.month1Profit = Number(document.getElementById('baseMonth1Profit').value) || 0;
-        appState.baseline.month1EndingStock = Number(document.getElementById('baseStockB1').value) || 0;
+        const newCap = Number(document.getElementById('baseInitialCap').value) || 0;
+        const newProf = Number(document.getElementById('baseMonth1Profit').value) || 0;
+        const newRawStock = Math.max(0, Number(document.getElementById('baseRawStockB1').value) || 0);
+        const newFinStock = Math.max(0, Number(document.getElementById('baseFinishedStockB1').value) || 0);
+        const newStock = newRawStock + newFinStock;
+        const newRecB1 = Math.max(0, Number(document.getElementById('baseRecB1').value) || 0);
+        const newPayB1 = Math.max(0, Number(document.getElementById('basePayB1').value) || 0);
+
+        appState.baseline.initialCapital = newCap;
+        appState.baseline.month1Profit = newProf;
+        appState.baseline.month1EndingRawStock = newRawStock;
+        appState.baseline.month1EndingFinishedStock = newFinStock;
+        appState.baseline.month1EndingStock = newStock;
+        if (appState.transactions.length === 0 && appState.month2EndingStock === 0) {
+          appState.month2EndingRawStock = newRawStock;
+          appState.month2EndingFinishedStock = newFinStock;
+          appState.month2EndingStock = newStock;
+        }
+
+        // Replace MONTH_1 carried-over receivable/payable summary items with user's manual amount
+        appState.receivables = appState.receivables.filter(r => r.origin !== 'MONTH_1');
+        if (newRecB1 > 0) {
+          appState.receivables.unshift({
+            id: 'rec-b1-manual',
+            origin: 'MONTH_1',
+            party: 'Piutang Bawaan Bulan Lalu',
+            description: 'Total Sisa Piutang Pelanggan dari Bulan Sebelumnya',
+            initialAmount: newRecB1,
+            paidInMonth2: 0,
+            date: todayStr
+          });
+        }
+
+        appState.payables = appState.payables.filter(p => p.origin !== 'MONTH_1');
+        if (newPayB1 > 0) {
+          appState.payables.unshift({
+            id: 'pay-b1-manual',
+            origin: 'MONTH_1',
+            party: 'Bon Hutang Bawaan Bulan Lalu',
+            description: 'Total Sisa Bon Hutang Supplier dari Bulan Sebelumnya',
+            initialAmount: newPayB1,
+            paidInMonth2: 0,
+            date: todayStr
+          });
+        }
+
         saveStore();
         renderAll();
         closeBaselineModal();
-        showToast('Patokan modal awal berhasil diperbarui!');
+        showToast('Modal dasar & saldo awal berhasil disimpan!');
       });
 
-      ['qcPrevNetWorth', 'qcCashNow', 'qcStockNow', 'qcRecNow', 'qcPayNow', 'qcOwnerDraw'].forEach(id => {
+      ['qcPrevNetWorth', 'qcCashNow', 'qcRawStockNow', 'qcFinishedStockNow', 'qcRecNow', 'qcPayNow', 'qcOwnerDraw'].forEach(id => {
         document.getElementById(id).addEventListener('input', runQuickCalculator);
       });
 
@@ -1929,6 +2487,8 @@
         const m = computeMetricsForPeriod(getActivePeriod());
         document.getElementById('qcPrevNetWorth').value = m.month1NetWorth;
         document.getElementById('qcCashNow').value = m.currentCash;
+        document.getElementById('qcRawStockNow').value = m.currentRawStock;
+        document.getElementById('qcFinishedStockNow').value = m.currentFinishedStock;
         document.getElementById('qcStockNow').value = m.currentStock;
         document.getElementById('qcRecNow').value = m.totalRemainingRec;
         document.getElementById('qcPayNow').value = m.totalRemainingPay;
@@ -1938,25 +2498,156 @@
       });
 
       document.getElementById('btnLoadDemo').addEventListener('click', () => {
-        store = getDefaultStore();
+        const demoP1 = {
+          id: 'period-1',
+          number: 1,
+          label: 'Bulan 1 (Okt 2026)',
+          baseline: {
+            initialCapital: 136000000,
+            month1Profit: 0,
+            month1EndingRawStock: 0,
+            month1EndingFinishedStock: 0,
+            month1EndingStock: 0
+          },
+          month2EndingRawStock: 18000000,
+          month2EndingFinishedStock: 14000000,
+          month2EndingStock: 32000000,
+          receivables: [
+            {
+              id: 'rec-b1-1',
+              origin: 'MONTH_2',
+              party: 'Agen Bawang Pasar Induk',
+              description: 'Nota Piutang Bawang Goreng Super',
+              totalInvoiceAmount: 25000000,
+              dpAmount: 0,
+              initialAmount: 25000000,
+              paidInMonth2: 0,
+              date: '2026-10-28'
+            },
+            {
+              id: 'rec-b1-2',
+              origin: 'MONTH_2',
+              party: 'Toko Oleh-Oleh Sari Rasa',
+              description: 'Titip Jual 200 Toples Bawang Goreng',
+              totalInvoiceAmount: 17000000,
+              dpAmount: 0,
+              initialAmount: 17000000,
+              paidInMonth2: 0,
+              date: '2026-10-30'
+            }
+          ],
+          payables: [
+            {
+              id: 'pay-b1-1',
+              origin: 'MONTH_2',
+              party: 'H. Sulaiman (Petani Bawang Probolinggo)',
+              description: 'Bon Bawang Merah Mentah 1,2 Ton',
+              totalInvoiceAmount: 15000000,
+              dpAmount: 0,
+              initialAmount: 15000000,
+              paidInMonth2: 0,
+              date: '2026-10-27'
+            },
+            {
+              id: 'pay-b1-2',
+              origin: 'MONTH_2',
+              party: 'Agen Minyak & Gas Sumber Makmur',
+              description: 'Bon Minyak Goreng Sawit 40 Jerigen',
+              totalInvoiceAmount: 9000000,
+              dpAmount: 0,
+              initialAmount: 9000000,
+              paidInMonth2: 0,
+              date: '2026-10-29'
+            }
+          ],
+          transactions: [
+            {
+              id: 'tx-okt-1',
+              date: '2026-10-15',
+              type: 'SALE_CASH',
+              party: 'Penjualan Tunai Oktober',
+              category: 'Penjualan Bawang Goreng',
+              note: 'Total penjualan tunai bawang goreng Oktober',
+              amount: 82000000,
+              dpAmount: 0,
+              linkedId: ''
+            },
+            {
+              id: 'tx-okt-2',
+              date: '2026-10-20',
+              type: 'EXPENSE_CASH',
+              party: 'Belanja Bahan & Produksi Tunai Oktober',
+              category: 'Bahan Baku Bawang Merah',
+              note: 'Total belanja bahan & biaya produksi tunai Oktober',
+              amount: 84000000,
+              dpAmount: 0,
+              linkedId: ''
+            },
+            {
+              id: 'tx-okt-3',
+              date: '2026-10-27',
+              type: 'EXPENSE_CREDIT',
+              party: 'H. Sulaiman (Petani Bawang Probolinggo)',
+              category: 'Bahan Baku Bawang Merah',
+              note: 'Bon Bawang Merah Mentah 1,2 Ton',
+              amount: 15000000,
+              dpAmount: 0,
+              linkedId: 'pay-b1-1'
+            },
+            {
+              id: 'tx-okt-4',
+              date: '2026-10-28',
+              type: 'SALE_CREDIT',
+              party: 'Agen Bawang Pasar Induk',
+              category: 'Penjualan Bawang Goreng',
+              note: 'Nota Piutang Bawang Goreng Super',
+              amount: 25000000,
+              dpAmount: 0,
+              linkedId: 'rec-b1-1'
+            },
+            {
+              id: 'tx-okt-5',
+              date: '2026-10-29',
+              type: 'EXPENSE_CREDIT',
+              party: 'Agen Minyak & Gas Sumber Makmur',
+              category: 'Minyak Goreng & Gas',
+              note: 'Bon Minyak Goreng Sawit 40 Jerigen',
+              amount: 9000000,
+              dpAmount: 0,
+              linkedId: 'pay-b1-2'
+            },
+            {
+              id: 'tx-okt-6',
+              date: '2026-10-30',
+              type: 'SALE_CREDIT',
+              party: 'Toko Oleh-Oleh Sari Rasa',
+              description: 'Titip Jual 200 Toples Bawang Goreng',
+              category: 'Penjualan Bawang Goreng',
+              note: 'Titip Jual 200 Toples Bawang Goreng',
+              amount: 17000000,
+              dpAmount: 0,
+              linkedId: 'rec-b1-2'
+            }
+          ]
+        };
+        store = {
+          activePeriodId: 'period-1',
+          periods: [demoP1, createDemoPeriodMonth2()]
+        };
         saveStore();
         renderAll();
-        showToast('Simulasi CV TANIH AMANAH99 berhasil dimuat!');
+        showToast('Simulasi Bulan 1 (Okt) & Bulan 2 (Nov) berhasil dimuat!');
       });
 
       document.getElementById('btnClearMonth2').addEventListener('click', () => {
-        const appState = getActivePeriod();
-        appState.transactions = [];
-        appState.receivables = appState.receivables
-          .filter(r => r.origin === 'MONTH_1')
-          .map(r => ({ ...r, paidInMonth2: 0 }));
-        appState.payables = appState.payables
-          .filter(p => p.origin === 'MONTH_1')
-          .map(p => ({ ...p, paidInMonth2: 0 }));
-        appState.month2EndingStock = appState.baseline.month1EndingStock;
+        store = getDefaultStore();
+        ['qcPrevNetWorth', 'qcCashNow', 'qcRawStockNow', 'qcFinishedStockNow', 'qcStockNow', 'qcRecNow', 'qcPayNow', 'qcOwnerDraw'].forEach(id => {
+          document.getElementById(id).value = 0;
+        });
         saveStore();
         renderAll();
-        showToast(`Data transaksi ${appState.label} dikosongkan.`, '🧹');
+        runQuickCalculator();
+        showToast('Semua data telah dikosongkan (Rp 0). Silakan isi manual!', '🧹');
       });
 
       document.getElementById('btnExportCsv').addEventListener('click', () => {
