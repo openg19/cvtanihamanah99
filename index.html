@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#020617" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CV TANIH AMANAH99" />
   <title>CV TANIH AMANAH99 — Enterprise Financial & Production ERP</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -50,6 +54,9 @@
       opacity: 1;
     }
   </style>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -80,6 +87,9 @@
         </button>
         <button id="btnClearMonth2" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-lg font-medium transition">
           🧹 Mulai Data Kosong Bulan Ke-2
+        </button>
+        <button id="btnInstallPwa" type="button" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-2 rounded-lg font-extrabold shadow-sm transition">
+          📲 Instal App (Android/PC)
         </button>
         <button id="btnExportCsv" type="button" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg font-bold shadow-sm transition">
           📥 Unduh Laporan CSV
@@ -182,6 +192,67 @@
         <div class="mt-2.5 pt-2 border-t border-slate-800 text-[11px] text-slate-300 flex justify-between">
           <span>Kekayaan Akhir:</span>
           <strong id="kpiMonth2NetWorth" class="text-amber-300">Rp 0</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Executive 3-Book Architecture & Liquidity/ROI Monitor -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+      <!-- Buku 1: Buku Kas (Uang Tunai Riil) -->
+      <div class="bg-white rounded-xl p-4 border-l-4 border-l-blue-600 border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-700">1. Buku Kas (Uang Tunai Riil)</span>
+          <span id="badgeCashRatio" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">Rasio Kas: 0%</span>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Kas Awal Periode:</span>
+          <strong id="book1StartCash" class="text-slate-800">Rp 0</strong>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Kas Riil Saat Ini:</span>
+          <strong id="book1EndCash" class="text-sm font-black text-blue-700">Rp 0</strong>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div id="barCashRatio" class="bg-blue-600 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Buku 2: Buku Laba-Rugi Bulan Ini (Reset Rp 0) -->
+      <div class="bg-white rounded-xl p-4 border-l-4 border-l-emerald-600 border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">2. Buku Laba-Rugi (Reset Rp 0)</span>
+          <span id="badgeRoiPct" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">ROI: 0.0%</span>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Modal Produksi Bulan Ini (Tunai+Bon):</span>
+          <strong id="book2ProdCost" class="text-rose-600">Rp 0</strong>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Omzet Bulan Ini (Tunai+Piutang Baru):</span>
+          <strong id="book2Revenue" class="text-sm font-black text-emerald-700">Rp 0</strong>
+        </div>
+        <div class="text-[10px] text-slate-400 flex justify-between pt-0.5 border-t border-slate-100">
+          <span>Mulai Rp 0 tiap awal bulan</span>
+          <span id="book2NetProfitMini" class="font-bold text-emerald-700">Laba: Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Buku 3: Buku Neraca / Total Modal Bersih (Ekuitas) -->
+      <div class="bg-white rounded-xl p-4 border-l-4 border-l-amber-500 border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">3. Buku Neraca (Ekuitas Usaha)</span>
+          <span id="badgeTrappedRatio" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">Tertahan: 0%</span>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Ekuitas Awal → Akhir:</span>
+          <strong id="book3EquityFlow" class="text-slate-900">Rp 0 → Rp 0</strong>
+        </div>
+        <div class="flex items-baseline justify-between text-xs">
+          <span class="text-slate-500">Modal Tertahan di Luar (Non-Kas):</span>
+          <strong id="book3TrappedVal" class="text-sm font-black text-amber-700">Rp 0</strong>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div id="barTrappedRatio" class="bg-amber-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
         </div>
       </div>
     </section>
@@ -678,29 +749,29 @@
           </div>
         </div>
 
-        <!-- 3-Step Visual Chain for Multi-Month -->
+        <!-- 3-Book Architecture Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-xl bg-slate-900 text-white p-4 border border-slate-800 space-y-1.5">
-            <span class="text-[11px] font-extrabold uppercase text-amber-400">Bulan 1 → Bulan 2</span>
-            <div class="text-sm font-bold">Modal 136 Jt + Laba 48 Jt = 184 Jt</div>
+          <div class="rounded-xl bg-slate-900 text-white p-4 border border-blue-500/40 space-y-1.5">
+            <span class="text-[11px] font-extrabold uppercase text-blue-400">1. Buku Kas (Uang Tunai Riil)</span>
+            <div class="text-sm font-bold">Mulai dari Kas Fisik (Misal Rp 1 Jt)</div>
             <p class="text-xs text-slate-300 leading-relaxed">
-              Angka <strong>Rp 184 Juta</strong> (Kekayaan Akhir Bulan 1) dikunci sebagai <strong>Modal Patokan Awal Bulan 2</strong>. Sisa piutang & bon hutang Bulan 1 dibawa ke Bulan 2.
+              Saat piutang bulan lalu cair, uangnya hanya pindah dari <strong>Buku Piutang → Buku Kas</strong> untuk modal belanja bahan. Bukan penjualan/laba baru.
+            </p>
+          </div>
+
+          <div class="rounded-xl bg-slate-900 text-white p-4 border border-emerald-500/40 space-y-1.5">
+            <span class="text-[11px] font-extrabold uppercase text-emerald-400">2. Buku Laba-Rugi (Reset Rp 0)</span>
+            <div class="text-sm font-bold">Hitung Murni Produksi Bulan Ini</div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Tiap awal bulan mulai dari <strong>Rp 0</strong>. Yang dihitung sebagai Modal Produksi hanyalah belanja bahan (tunai dari kas/piutang cair maupun bon baru) di bulan tersebut.
             </p>
           </div>
 
           <div class="rounded-xl bg-slate-900 text-white p-4 border border-amber-500/40 space-y-1.5">
-            <span class="text-[11px] font-extrabold uppercase text-emerald-400">Bulan 2 → Bulan 3</span>
-            <div class="text-sm font-bold">Klik "Tutup Buku & Lanjut Bulan Berikutnya"</div>
+            <span class="text-[11px] font-extrabold uppercase text-amber-400">3. Buku Neraca (Ekuitas Usaha)</span>
+            <div class="text-sm font-bold">Ekuitas Awal (184 Jt) + Laba Baru</div>
             <p class="text-xs text-slate-300 leading-relaxed">
-              Di akhir Bulan 2, klik tombol emas di kanan atas. <strong>Kekayaan Bersih Akhir Bulan 2</strong> otomatis menjadi <strong>Modal Patokan Awal Bulan 3</strong>, dan sisa bon/piutang yang belum lunas otomatis terbawa ke Bulan 3.
-            </p>
-          </div>
-
-          <div class="rounded-xl bg-slate-900 text-white p-4 border border-slate-800 space-y-1.5">
-            <span class="text-[11px] font-extrabold uppercase text-blue-400">Bulan 3 → Bulan 4 → Seterusnya</span>
-            <div class="text-sm font-bold">Rumusnya Selalu Sama Setiap Bulan</div>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              <code>Laba Bulan Ini = Kekayaan Bersih Akhir Bulan Ini − Kekayaan Bersih Akhir Bulan Lalu</code>. Tidak peduli hutang/piutang dari bulan mana pun, tidak akan pernah dobel hitung.
+              Saat tutup buku, <strong>Ekuitas Akhir</strong> wajib sama dengan <code>Kas Akhir + Stok Bahan + Stok Jadi + Sisa Piutang − Sisa Bon Hutang</code>.
             </p>
           </div>
         </div>
@@ -854,6 +925,40 @@
         <button id="btnCancelRollover" type="button" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold text-xs">Batal</button>
         <button id="btnConfirmRollover" type="button" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs">
           🚀 Kunci Bulan Ini & Buka Bulan Baru
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Panduan & Aksi Instal Aplikasi (Android / PC) -->
+  <div id="modalInstallPwa" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📲</span>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Instal CV TANIH AMANAH99</h3>
+            <p class="text-xs text-slate-500">Pasang langsung di Layar Utama Android & Desktop PC</p>
+          </div>
+        </div>
+        <button id="btnCloseInstallModal" type="button" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <div id="pwaInstallPromptArea" class="space-y-3 text-xs text-slate-700">
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-1.5">
+          <div class="font-extrabold text-slate-900">📱 Di Android (Google Chrome):</div>
+          <p>Buka alamat domain Vercel Anda di Chrome → ketuk titik tiga <strong>(⋮)</strong> di pojok kanan atas → pilih <strong>"Tambahkan ke Layar Utama" / "Instal Aplikasi"</strong>.</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-1.5">
+          <div class="font-extrabold text-slate-900">💻 Di PC / Laptop (Chrome / Edge):</div>
+          <p>Buka alamat domain Vercel Anda → klik ikon <strong>Instal (layar dengan panah bawah)</strong> di ujung kanan kolom alamat URL → klik <strong>"Instal"</strong>.</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <button id="btnCancelInstall" type="button" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold text-xs">Tutup</button>
+        <button id="btnTriggerNativeInstall" type="button" class="hidden px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs">
+          ⚡ Instal Sekarang
         </button>
       </div>
     </div>
@@ -1280,7 +1385,19 @@
       const adjustedBaseline = month1NetWorth - ownerDraw + capitalIn;
       const profitMethod2 = month2NetWorth - adjustedBaseline;
 
+      const totalProdCost = expenseCash + expenseCredit;
+      const modalTertahanNow = month2NetWorth - currentCash;
+      const rasioKasPct = month2NetWorth > 0 ? Math.max(0, Math.min(100, (currentCash / month2NetWorth) * 100)) : 0;
+      const rasioTertahanPct = month2NetWorth > 0 ? Math.max(0, Math.min(100, (modalTertahanNow / month2NetWorth) * 100)) : 0;
+      const roiDenominator = month1NetWorth > 0 ? month1NetWorth : totalProdCost;
+      const roiPct = roiDenominator > 0 ? (profitMethod1 / roiDenominator) * 100 : 0;
+
       return {
+        totalProdCost,
+        modalTertahanNow,
+        rasioKasPct,
+        rasioTertahanPct,
+        roiPct,
         month1NetWorth,
         month1EndingCash,
         month1Stock,
@@ -1460,6 +1577,22 @@
 
       document.getElementById('kpiMonth2Profit').textContent = formatRp(m.profitMethod1);
       document.getElementById('kpiMonth2NetWorth').textContent = formatRp(m.month2NetWorth);
+
+      // Populate 3-Book Architecture & Liquidity/ROI Monitor
+      document.getElementById('book1StartCash').textContent = formatRp(m.month1EndingCash);
+      document.getElementById('book1EndCash').textContent = formatRp(m.currentCash);
+      document.getElementById('badgeCashRatio').textContent = `Rasio Kas: ${m.rasioKasPct.toFixed(1)}%`;
+      document.getElementById('barCashRatio').style.width = `${m.rasioKasPct.toFixed(1)}%`;
+
+      document.getElementById('book2ProdCost').textContent = formatRp(m.totalProdCost);
+      document.getElementById('book2Revenue').textContent = formatRp(m.totalRevMonth2);
+      document.getElementById('book2NetProfitMini').textContent = `Laba: ${formatRp(m.profitMethod1)}`;
+      document.getElementById('badgeRoiPct').textContent = `ROI: ${m.roiPct.toFixed(1)}%`;
+
+      document.getElementById('book3EquityFlow').textContent = `${formatRp(m.month1NetWorth)} → ${formatRp(m.month2NetWorth)}`;
+      document.getElementById('book3TrappedVal').textContent = formatRp(m.modalTertahanNow);
+      document.getElementById('badgeTrappedRatio').textContent = `Tertahan: ${m.rasioTertahanPct.toFixed(1)}%`;
+      document.getElementById('barTrappedRatio').style.width = `${m.rasioTertahanPct.toFixed(1)}%`;
 
       document.getElementById('inputEndingRawStock').value = m.currentRawStock;
       document.getElementById('inputEndingFinishedStock').value = m.currentFinishedStock;
@@ -1828,7 +1961,12 @@
         const pid = btn.getAttribute('data-switch-period');
         store.activePeriodId = pid;
         saveStore();
-        renderAll();
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+      renderAll();
         showToast('Berpindah ke ' + getActivePeriod().label);
       });
 
@@ -2514,6 +2652,17 @@
           month2EndingStock: 32000000,
           receivables: [
             {
+              id: 'rec-b1-besar',
+              origin: 'MONTH_2',
+              party: 'Agen Besar & Reseller Oktober',
+              description: 'Piutang tertahan di pelanggan (sisa kas riil Rp 1 Jt)',
+              totalInvoiceAmount: 133000000,
+              dpAmount: 0,
+              initialAmount: 133000000,
+              paidInMonth2: 0,
+              date: '2026-10-26'
+            },
+            {
               id: 'rec-b1-1',
               origin: 'MONTH_2',
               party: 'Agen Bawang Pasar Induk',
@@ -2578,10 +2727,21 @@
               type: 'EXPENSE_CASH',
               party: 'Belanja Bahan & Produksi Tunai Oktober',
               category: 'Bahan Baku Bawang Merah',
-              note: 'Total belanja bahan & biaya produksi tunai Oktober',
-              amount: 84000000,
+              note: 'Belanja bahan & biaya produksi tunai Oktober (sisa kas fisik 1 Jt)',
+              amount: 217000000,
               dpAmount: 0,
               linkedId: ''
+            },
+            {
+              id: 'tx-okt-piutang-besar',
+              date: '2026-10-26',
+              type: 'SALE_CREDIT',
+              party: 'Agen Besar & Reseller Oktober',
+              category: 'Penjualan Bawang Goreng',
+              note: 'Piutang tertahan di pelanggan (99,5% modal tertahan)',
+              amount: 133000000,
+              dpAmount: 0,
+              linkedId: 'rec-b1-besar'
             },
             {
               id: 'tx-okt-3',
@@ -2680,6 +2840,44 @@
         document.body.removeChild(link);
         showToast('Laporan CSV berhasil diunduh!');
       });
+
+      // PWA Install Prompt Handler (Android & PC)
+      let deferredInstallPrompt = null;
+      const modalInstall = document.getElementById('modalInstallPwa');
+      const btnTriggerNative = document.getElementById('btnTriggerNativeInstall');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        btnTriggerNative.classList.remove('hidden');
+      });
+
+      document.getElementById('btnInstallPwa').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            showToast('Aplikasi CV TANIH AMANAH99 berhasil diinstal!', '🎉');
+          }
+          deferredInstallPrompt = null;
+          btnTriggerNative.classList.add('hidden');
+        } else {
+          modalInstall.classList.remove('hidden');
+        }
+      });
+
+      btnTriggerNative.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        btnTriggerNative.classList.add('hidden');
+        modalInstall.classList.add('hidden');
+      });
+
+      const closeInstallModal = () => modalInstall.classList.add('hidden');
+      document.getElementById('btnCloseInstallModal').addEventListener('click', closeInstallModal);
+      document.getElementById('btnCancelInstall').addEventListener('click', closeInstallModal);
 
       renderAll();
       runQuickCalculator();
