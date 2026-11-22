@@ -1,6 +1,9 @@
 {
   "name": "cv-tanih-amanah99-erp",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
-  "description": "Sistem Enterprise Manajemen Keuangan & Produksi Bawang Goreng CV TANIH AMANAH99"
+  "description": "Sistem Enterprise Manajemen Keuangan & Produksi Bawang Goreng CV TANIH AMANAH99",
+  "dependencies": {
+    "redis": "^4.7.0"
+  }
 }

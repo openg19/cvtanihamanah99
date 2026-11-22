@@ -188,6 +188,9 @@
         <button id="btnOpenBaselineModal" type="button" class="w-full text-left text-xs bg-slate-900 hover:bg-slate-800 text-amber-300 border border-slate-800 px-3 py-2.5 rounded-xl font-semibold transition">
           ⚙️ Modal Dasar
         </button>
+        <button id="btnOpenEasySync" type="button" class="w-full text-left text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-3 py-2.5 rounded-xl font-extrabold shadow-sm transition">
+          📲 Sinkron HP ↔ PC (1 Klik)
+        </button>
         <button id="btnBackupJson" type="button" class="w-full text-left text-xs bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 px-3 py-2.5 rounded-xl font-bold transition">
           💾 Backup Data
         </button>
@@ -1112,6 +1115,46 @@
           <button type="submit" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs">💾 Simpan Perubahan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Sinkronisasi Mudah 1-Klik HP ↔ PC (Tanpa Setting Server) -->
+  <div id="modalEasySync" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 my-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">📲 Sinkronisasi Mudah HP ↔ PC</h3>
+          <p class="text-xs text-slate-500">Samakan data komputer & HP dalam 2 detik tanpa setting server</p>
+        </div>
+        <button id="btnCloseEasySync" type="button" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3.5 space-y-2.5">
+          <div class="font-extrabold text-emerald-900">1. Kirim Data dari Perangkat Ini ke HP / PC Lain:</div>
+          <p class="text-emerald-800/90 leading-relaxed">Klik tombol di bawah untuk mengirim link sinkronisasi ke WhatsApp Anda sendiri. Di perangkat lain, cukup <strong>klik link di WA tersebut</strong> — seluruh data langsung sama persis!</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button id="btnSendSyncWa" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 px-3 rounded-xl shadow-sm transition">
+              💬 Kirim Link ke WA
+            </button>
+            <button id="btnCopySyncLink" type="button" class="bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold py-2.5 px-3 rounded-xl shadow-sm transition">
+              📋 Salin Link Sinkron
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-2">
+          <div class="font-extrabold text-slate-800">2. Atau Tempel Link / Kode Sinkron di Sini:</div>
+          <textarea id="inputPasteSyncCode" rows="2" placeholder="Tempel link atau kode sinkronisasi dari perangkat lain di sini..." class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-[11px] font-mono text-slate-800"></textarea>
+          <button id="btnApplySyncCode" type="button" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-2 px-3 rounded-xl transition">
+            ✅ Terapkan Data dari Link / Kode
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-1">
+        <button id="btnCancelEasySync" type="button" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold text-xs">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -2345,7 +2388,7 @@
           closeSideDrawer();
         });
       });
-      ['btnOpenBaselineModal', 'btnBackupJson', 'btnRestoreJson', 'btnExportCsv', 'btnInstallPwa', 'btnLoadDemo', 'btnClearMonth2', 'btnLogout'].forEach(id => {
+      ['btnOpenEasySync', 'btnOpenBaselineModal', 'btnBackupJson', 'btnRestoreJson', 'btnExportCsv', 'btnInstallPwa', 'btnLoadDemo', 'btnClearMonth2', 'btnLogout'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('click', closeSideDrawer);
       });
@@ -3435,6 +3478,7 @@
           badge.className = 'text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded ml-1';
         }
         renderAll();
+        checkIncomingHashSync();
         runQuickCalculator();
       }
 
@@ -3453,10 +3497,121 @@
         showToast('Berhasil masuk sebagai admin!');
       });
 
+      // Easy 1-Click Sync Helpers (URL Hash / WhatsApp Link / Paste Code)
+      function encodeStoreToSyncCode(storeObj) {
+        const jsonStr = JSON.stringify(storeObj);
+        const bytes = new TextEncoder().encode(jsonStr);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function decodeSyncCodeToStore(rawInput) {
+        let code = String(rawInput || '').trim();
+        const hashIdx = code.indexOf('#sync=');
+        if (hashIdx !== -1) code = code.slice(hashIdx + 6);
+        code = code.split(/[\s&]/)[0];
+        code = code.replace(/-/g, '+').replace(/_/g, '/');
+        while (code.length % 4) code += '=';
+        const bin = atob(code);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const jsonStr = new TextDecoder().decode(bytes);
+        const parsed = JSON.parse(jsonStr);
+        if (!parsed || !Array.isArray(parsed.periods) || parsed.periods.length === 0) {
+          throw new Error('Format kode sinkron tidak valid.');
+        }
+        return parsed;
+      }
+
+      function buildSyncShareUrl() {
+        const base = (window.location.href || '').split('#')[0];
+        const code = encodeStoreToSyncCode(store);
+        return `${base}#sync=${code}`;
+      }
+
+      function copyTextSafe(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          });
+        }
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return Promise.resolve();
+      }
+
+      function checkIncomingHashSync() {
+        try {
+          const h = window.location.hash || '';
+          if (h.startsWith('#sync=')) {
+            const imported = decodeSyncCodeToStore(h);
+            imported.updatedAt = Date.now();
+            store = imported;
+            saveStore();
+            renderAll();
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+            showToast('Seluruh data dari perangkat lain berhasil disinkronkan!', '🎉');
+          }
+        } catch (err) {
+          showToast('Link sinkronisasi tidak valid atau terpotong.', '⚠️');
+        }
+      }
+
+      const modalEasySync = document.getElementById('modalEasySync');
+      const openEasySync = () => modalEasySync.classList.remove('hidden');
+      const closeEasySync = () => modalEasySync.classList.add('hidden');
+      document.getElementById('btnOpenEasySync').addEventListener('click', openEasySync);
+      document.getElementById('btnCloseEasySync').addEventListener('click', closeEasySync);
+      document.getElementById('btnCancelEasySync').addEventListener('click', closeEasySync);
+
+      document.getElementById('btnCopySyncLink').addEventListener('click', async () => {
+        const url = buildSyncShareUrl();
+        await copyTextSafe(url);
+        showToast('Link sinkronisasi berhasil disalin! Buka di HP/PC lain agar data langsung sama.', '📋');
+      });
+
+      document.getElementById('btnSendSyncWa').addEventListener('click', () => {
+        const url = buildSyncShareUrl();
+        const msg = `Sinkronisasi Data CV TANIH AMANAH99 (klik link ini di HP/PC untuk menyamakan data):\n${url}`;
+        window.open(`https://wa.me/6281339700367?text=${encodeURIComponent(msg)}`, '_blank');
+      });
+
+      document.getElementById('btnApplySyncCode').addEventListener('click', () => {
+        const raw = document.getElementById('inputPasteSyncCode').value.trim();
+        if (!raw) {
+          showToast('Tempel link atau kode sinkronisasi terlebih dahulu.', '⚠️');
+          return;
+        }
+        try {
+          const imported = decodeSyncCodeToStore(raw);
+          imported.updatedAt = Date.now();
+          store = imported;
+          saveStore();
+          renderAll();
+          document.getElementById('inputPasteSyncCode').value = '';
+          closeEasySync();
+          showToast('Data berhasil disinkronkan dari link/kode!', '✅');
+        } catch (err) {
+          showToast('Kode/link tidak valid atau terpotong. Coba salin ulang.', '⚠️');
+        }
+      });
+
       document.getElementById('btnManualSync').addEventListener('click', async () => {
         if (!currentSession) return;
         if (!getSyncTargetUrl(currentSession)) {
-          showToast('Sinkronisasi online aktif saat aplikasi dibuka dari domain Vercel Anda.', '☁️');
+          openEasySync();
           return;
         }
         setSyncBadge('Menyinkronkan...', 'warn');
@@ -3464,7 +3619,8 @@
         if (res && res.ok) {
           showToast(res.message, '✅');
         } else {
-          showToast((res && res.message) || 'Sinkronisasi gagal.', '⚠️');
+          openEasySync();
+          showToast('Mode Cloud belum aktif — gunakan Sinkron 1-Klik via WA/Link di bawah ini!', '📲');
         }
       });
 
