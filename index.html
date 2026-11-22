@@ -1516,22 +1516,47 @@
       return null;
     }
 
-    async function syncFromCloud(session, forcePull = false) {
-      if (!session) return false;
-      const target = getSyncTargetUrl(session);
-      if (!target) return false;
+    function setSyncBadge(text, style = 'neutral') {
       const badge = document.getElementById('cloudSyncBadge');
+      if (!badge) return;
+      badge.textContent = text;
+      const cls = {
+        ok: 'text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded',
+        err: 'text-[10px] bg-rose-600 text-white px-1.5 py-0.5 rounded',
+        warn: 'text-[10px] bg-amber-600 text-white px-1.5 py-0.5 rounded',
+        neutral: 'text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded'
+      };
+      badge.className = cls[style] || cls.neutral;
+    }
+
+    async function syncFromCloud(session, forcePull = false) {
+      if (!session) return { ok: false, message: 'Belum login.' };
+      const target = getSyncTargetUrl(session);
+      if (!target) {
+        setSyncBadge('Lokal', 'neutral');
+        return { ok: false, message: 'Mode Lokal (buka lewat domain Vercel untuk sinkronisasi online).' };
+      }
       const sep = target.url.includes('?') ? '&' : '?';
       try {
         const res = await fetch(`${target.url}${sep}_t=${Date.now()}`, { cache: 'no-store' });
-        if (res.status === 503) {
-          if (badge) {
-            badge.textContent = '⚠️ Hubungkan Redis di Vercel';
-            badge.className = 'text-[10px] bg-rose-600 text-white px-1.5 py-0.5 rounded ml-1';
+        if (!res.ok) {
+          let errMsg = `HTTP ${res.status}`;
+          try {
+            const errJson = await res.json();
+            if (errJson && errJson.error) errMsg = errJson.error;
+          } catch (_) {}
+          if (res.status === 404) {
+            setSyncBadge('⚠️ API 404', 'err');
+            return { ok: false, message: 'File api/sync.js belum ikut terunggah di Vercel (Error 404).' };
           }
-          return false;
+          if (res.status === 503) {
+            setSyncBadge('⚠️ Hubungkan Redis', 'err');
+            return { ok: false, message: errMsg };
+          }
+          setSyncBadge(`⚠️ Error ${res.status}`, 'err');
+          return { ok: false, message: `Gagal sinkron (${res.status}): ${errMsg}` };
         }
-        if (!res.ok) return false;
+
         const json = await res.json();
         const cloudData = (json && json.data) ? json.data : json;
         if (cloudData && Array.isArray(cloudData.periods) && cloudData.periods.length > 0) {
@@ -1547,30 +1572,25 @@
       }
       renderAll();
           } else if (localTs > cloudTs) {
-            await pushToCloud(session);
+            const pushRes = await pushToCloud(session);
+            return pushRes;
           }
-          if (badge) {
-            badge.textContent = '☁️ Cloud Sync ✓';
-            badge.className = 'text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded ml-1';
-          }
-          return true;
+          setSyncBadge('☁️ Sync ✓', 'ok');
+          return { ok: true, message: 'Data berhasil disinkronkan dengan server cloud!' };
         } else {
-          await pushToCloud(session);
+          const pushRes = await pushToCloud(session);
+          return pushRes;
         }
       } catch (e) {
-        if (badge) {
-          badge.textContent = 'Offline / Lokal';
-          badge.className = 'text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded ml-1';
-        }
+        setSyncBadge('Offline', 'warn');
+        return { ok: false, message: 'Tidak dapat menghubungi server cloud (cek koneksi internet).' };
       }
-      return false;
     }
 
     async function pushToCloud(session) {
-      if (!session) return;
+      if (!session) return { ok: false, message: 'Belum login.' };
       const target = getSyncTargetUrl(session);
-      if (!target) return;
-      const badge = document.getElementById('cloudSyncBadge');
+      if (!target) return { ok: false, message: 'Mode Lokal.' };
       try {
         const res = await fetch(target.url, {
           method: target.mode === 'firebase' ? 'PUT' : 'POST',
@@ -1578,20 +1598,28 @@
           body: JSON.stringify(store),
           cache: 'no-store'
         });
-        if (res.status === 503 && badge) {
-          badge.textContent = '⚠️ Hubungkan Redis di Vercel';
-          badge.className = 'text-[10px] bg-rose-600 text-white px-1.5 py-0.5 rounded ml-1';
-          return;
+        if (!res.ok) {
+          let errMsg = `HTTP ${res.status}`;
+          try {
+            const errJson = await res.json();
+            if (errJson && errJson.error) errMsg = errJson.error;
+          } catch (_) {}
+          if (res.status === 404) {
+            setSyncBadge('⚠️ API 404', 'err');
+            return { ok: false, message: 'File api/sync.js belum ikut terunggah di Vercel (Error 404).' };
+          }
+          if (res.status === 503) {
+            setSyncBadge('⚠️ Hubungkan Redis', 'err');
+            return { ok: false, message: errMsg };
+          }
+          setSyncBadge(`⚠️ Error ${res.status}`, 'err');
+          return { ok: false, message: `Gagal kirim data (${res.status}): ${errMsg}` };
         }
-        if (res.ok && badge) {
-          badge.textContent = '☁️ Cloud Sync ✓';
-          badge.className = 'text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded ml-1';
-        }
+        setSyncBadge('☁️ Sync ✓', 'ok');
+        return { ok: true, message: 'Data perangkat ini berhasil disimpan ke server cloud!' };
       } catch (e) {
-        if (badge) {
-          badge.textContent = 'Offline / Lokal';
-          badge.className = 'text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded ml-1';
-        }
+        setSyncBadge('Offline', 'warn');
+        return { ok: false, message: 'Gagal mengirim data ke cloud (offline).' };
       }
     }
 
@@ -3428,12 +3456,16 @@
       document.getElementById('btnManualSync').addEventListener('click', async () => {
         if (!currentSession) return;
         if (!getSyncTargetUrl(currentSession)) {
-          showToast('Sinkronisasi otomatis aktif saat aplikasi dibuka dari domain Vercel Anda.', '☁️');
+          showToast('Sinkronisasi online aktif saat aplikasi dibuka dari domain Vercel Anda.', '☁️');
           return;
         }
-        showToast('Menyinkronkan data terbaru...', '🔄');
-        await syncFromCloud(currentSession, true);
-        showToast('Data terbaru berhasil disinkronkan!', '✅');
+        setSyncBadge('Menyinkronkan...', 'warn');
+        const res = await syncFromCloud(currentSession, true);
+        if (res && res.ok) {
+          showToast(res.message, '✅');
+        } else {
+          showToast((res && res.message) || 'Sinkronisasi gagal.', '⚠️');
+        }
       });
 
       document.addEventListener('visibilitychange', () => {
