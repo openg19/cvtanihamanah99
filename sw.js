@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cv-tanih-amanah99-v1';
+const CACHE_NAME = 'cv-tanih-amanah99-v2';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -17,6 +17,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('/api/')) return;
   event.respondWith(
     fetch(event.request).then((res) => {
       if (res && res.status === 200 && res.type === 'basic') {
